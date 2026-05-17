@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script defer src="/api/pixel.js.php"></script>
+<script defer src="/api/tracking.js.php"></script>
+<script defer src="/tt-checkout-bridge.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processando Pagamento - TikTok Shop Oficial</title>
+    <link rel="stylesheet" href="css/tiktok-sans.css">
+    
+    <script>
+      (function() {
+        function generateEventId() {
+          return 'order_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function trackCompletePayment() {
+          try {
+            // ========== BUSCA DADOS DA URL (PRIORIDADE) ==========
+            console.log('🔍 Buscando dados da URL...');
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Extrai dados da URL
+            const urlNome = urlParams.get('nome') || '';
+            const urlEmail = urlParams.get('email') || '';
+            const urlTelefone = urlParams.get('telefone') || '';
+            const urlCPF = urlParams.get('cpf') || '';
+            const urlValor = urlParams.get('valor') || ''; // valor em centavos
+            
+            console.log('📦 Dados capturados da URL:', {
+                nome: urlNome,
+                email: urlEmail,
+                telefone: urlTelefone,
+                cpf: urlCPF,
+                valor: urlValor
+            });
+            
+            // ========== FALLBACK: BUSCA DADOS DO LOCALSTORAGE ==========
+            console.log('🔍 Buscando dados do localStorage (fallback)...');
+            
+            // Buscar dados consolidados do checkout
+            const checkoutFormData = JSON.parse(localStorage.getItem('checkout_form_data') || '{}');
+            const checkoutTotal = parseFloat(localStorage.getItem('checkout_total') || '0');
+            const checkoutProductTitle = localStorage.getItem('checkout_product_title') || 'Produto';
+            
+            // Dados do cliente do localStorage
+            const lsNome = checkoutFormData.name || '';
+            const lsEmail = checkoutFormData.email || '';
+            const lsTelefone = checkoutFormData.phone || '';
+            const lsCPF = checkoutFormData.cpf || '';
+            
+            console.log('📦 Dados capturados do localStorage:', {
+                nome: lsNome,
+                email: lsEmail,
+                telefone: lsTelefone,
+                cpf: lsCPF,
+                valor: checkoutTotal,
+                produto: checkoutProductTitle
+            });
+            
+            // ========== PRIORIZA URL, FALLBACK LOCALSTORAGE ==========
+            const checkoutName = urlNome || lsNome;
+            const checkoutEmail = urlEmail || lsEmail;
+            const checkoutPhone = urlTelefone || lsTelefone;
+            const checkoutCPF = urlCPF || lsCPF;
+            
+            // Valor: prioriza URL (em centavos), fallback localStorage
+            let totalValue = 0;
+            if (urlValor) {
+                totalValue = parseFloat(urlValor) / 100; // Converte centavos para reais
+                console.log('✅ Usando valor da URL:', totalValue);
+            } else if (checkoutTotal) {
+                totalValue = checkoutTotal;
+                console.log('✅ Usando valor do localStorage:', totalValue);
+            }
+            
+            console.log('✅ Dados finais (URL + fallback localStorage):', {
+                nome: checkoutName,
+                email: checkoutEmail,
+                telefone: checkoutPhone,
+                cpf: checkoutCPF,
+                valor: totalValue,
+                produto: checkoutProductTitle
+            });
+            
+            // Calcula quantidade
+            let quantity = 1;
+            
+            // Busca content_id (ID do produto) - pode vir da URL ou usar padrão
+            let contentId = urlParams.get('id') || 'product-default';
+            let productName = checkoutProductTitle || 'Produto';
+            
+            console.log('� Produto:', productName, '| ID:', contentId);
+            
+            // Gera event_id único para deduplicação
+            const eventId = generateEventId();
+            
+            // Prepara dados do evento
+            const eventData = {
+                content_id: contentId,
+                content_type: 'product',
+                content_name: productName,
+                quantity: quantity,
+                value: totalValue,
+                currency: 'BRL',
+                contents: [{
+                    content_id: contentId,
+                    content_name: productName,
+                    quantity: quantity,
+                    price: totalValue
+                }]
+            };
+            
+            // Adiciona event_id para deduplicação
+            const options = {
+              event_id: eventId
+            };
+            
+            console.log('🎯 Preparando TikTok CompletePayment (SERVER-SIDE apenas):', eventData);
+            
+            // ❌ PIXEL BROWSER-SIDE DESATIVADO (enviando apenas server-side)
+            // ttq.track('CompletePayment', eventData, options);
+            
+            console.log('ℹ️ Pixel browser-side desativado - usando apenas SERVER-SIDE');
+            console.log('🆔 Event ID:', eventId);
+            console.log('💰 Valor:', 'R$', totalValue.toFixed(2));
+            
+            // 2️⃣ DISPARA EVENTOS SERVER-SIDE (via API)
+            if (typeof window.TikTokTracking !== 'undefined') {
+                console.log('📤 Enviando eventos SERVER-SIDE...');
+                // Busca ttclid
+                const ttclid = window.TikTokTracking.getTtclid();
+                console.log('🔗 ttclid capturado:', ttclid || 'não encontrado');
+                
+                // Prepara dados base do evento (formato TikTok Payload Helper)
+                const baseEventData = {
+                    ttclid: ttclid, // ⭐ CRÍTICO: Envia ttclid para atribuição
+                    page_url: window.location.href, // URL completa da página
+                    properties: {
+                        currency: 'BRL', // Currency primeiro (como no exemplo do TikTok)
+                        value: totalValue,
+                        content_type: 'product',
+                        content_id: contentId,
+                        content_name: productName,
+                        quantity: quantity,
+                        contents: [{
+                            content_id: contentId,
+                            content_name: productName,
+                            quantity: quantity,
+                            price: totalValue
+                        }]
+                    }
+                };
+                
+                // Adiciona dados do usuário - USA DADOS PRIORIZADOS (URL + fallback localStorage)
+                const userEmail = checkoutEmail || '';
+                const userPhone = checkoutPhone || '';
+                const userName = checkoutName || '';
+                
+                console.log('👤 Dados do usuário capturados:', {
+                    email: userEmail,
+                    phone: userPhone,
+                    name: userName
+                });
+                
+                if (userEmail || userPhone) {
+                    baseEventData.user = {};
+                    if (userEmail && userEmail.trim() !== '') {
+                        baseEventData.user.email = userEmail;
+                    }
+                    if (userPhone && userPhone.trim() !== '') {
+                        baseEventData.user.phone = userPhone;
+                    }
+                    if (userName && userName.trim() !== '') {
+                        baseEventData.user.external_id = userName;
+                    }
+                    console.log('✅ Dados do usuário para TikTok:', baseEventData.user);
+                } else {
+                    console.warn('⚠️ Nenhum dado de usuário encontrado (email/phone)');
+                }
+                
+                // Envia CompletePayment
+                const completePaymentData = {
+                    event: 'CompletePayment',
+                    timestamp: Math.floor(Date.now() / 1000), // Unix timestamp em segundos
+                    ...baseEventData
+                };
+                console.log('📦 Enviando CompletePayment SERVER-SIDE:', completePaymentData);
+                window.TikTokTracking.sendServerSideEvent(completePaymentData);
+                console.log('✅ CompletePayment SERVER-SIDE enviado!');
+                
+                console.log('✅ Evento SERVER-SIDE executado!');
+                console.log('🎯 ttclid incluído:', ttclid ? 'SIM' : 'NÃO');
+            } else {
+                console.warn('⚠️ TikTokTracking não carregado. Apenas pixel foi disparado.');
+                console.warn('⚠️ Verifique se tiktok-tracking.js foi carregado corretamente.');
+            }
+            
+          } catch (error) {
+            console.error('❌ Erro ao rastrear conversão TikTok:', error);
+          }
+        }
+
+        // Executa quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+          // Dispara evento server-side diretamente
+          console.log('🚀 Iniciando rastreamento SERVER-SIDE...');
+          trackCompletePayment();
+        });
+      })();
+    </script>
+    <style>
+        :root {
+            --color-primary: #ff2b56;
+            --color-primary-light: #ff3b70;
+            --color-success: #2e7d32;
+            --color-success-light: #e8f5e9;
+            --color-text-primary: #222222;
+            --color-text-secondary: #555555;
+            --color-text-tertiary: #777777;
+            --color-border-light: #e8e8e8;
+            --color-background: #ffffff;
+            --color-background-soft: #f7f7f7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--color-background-soft);
+            min-height: 100vh;
+            padding-bottom: 20px;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            z-index: 100;
+        }
+
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 72px 16px 20px;
+        }
+
+        .loading-container {
+            background: white;
+            border-radius: 12px;
+            padding: 48px 20px;
+            text-align: center;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 3;
+            stroke: var(--color-primary);
+            stroke-miterlimit: 10;
+            margin: 20px auto;
+            box-shadow: inset 0px 0px 0px var(--color-primary);
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+
+        .checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 3;
+            stroke-miterlimit: 10;
+            stroke: var(--color-primary);
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes scale {
+            0%, 100% {
+                transform: none;
+            }
+            50% {
+                transform: scale3d(1.1, 1.1, 1);
+            }
+        }
+
+        @keyframes fill {
+            100% {
+                box-shadow: inset 0px 0px 0px 30px var(--color-primary);
+            }
+        }
+
+        .loading-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+
+        .loading-subtitle {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            margin: 20px auto;
+            border: 4px solid rgba(255, 43, 86, 0.1);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: var(--color-primary);
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 480px) {
+            .container {
+                padding: 68px 12px 20px;
+            }
+
+            .loading-container {
+                padding: 32px 16px;
+            }
+
+            .loading-title {
+                font-size: 18px;
+            }
+
+            .loading-subtitle {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body data-tt-purchase-page="1">
+    <header class="header">
+        <h1 class="header-title">Processando Pagamento</h1>
+    </header>
+
+    <div class="container">
+        <div class="loading-container">
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+        
+        <h1 class="loading-title">Pagamento Confirmado!</h1>
+        <p class="loading-subtitle">Processando seu pedido...</p>
+        
+        <div class="spinner"></div>
+        <p class="progress-text">Redirecionando...</p>
+        </div>
+    </div>
+
+    <script>
+        // ========== TESTE: Exibe dados capturados do localStorage ==========
+        console.log('=== DADOS CAPTURADOS DO LOCALSTORAGE ===');
+        
+        // Buscar dados consolidados do checkout
+        const checkoutFormData = JSON.parse(localStorage.getItem('checkout_form_data') || '{}');
+        const checkoutTotal = parseFloat(localStorage.getItem('checkout_total') || '0');
+        const checkoutProductTitle = localStorage.getItem('checkout_product_title') || 'Produto';
+        
+        console.log('Nome:', checkoutFormData.name || 'Não informado');
+        console.log('Email:', checkoutFormData.email || 'Não informado');
+        console.log('Telefone:', checkoutFormData.phone || 'Não informado');
+        console.log('CPF:', checkoutFormData.cpf || 'Não informado');
+        console.log('Valor Total:', checkoutTotal);
+        console.log('Produto:', checkoutProductTitle);
+        console.log('Endereço:', checkoutFormData.street ? 
+            `${checkoutFormData.street}, ${checkoutFormData.number} - ${checkoutFormData.neighborhood}, ${checkoutFormData.city}/${checkoutFormData.state}` : 
+            'Não informado');
+        console.log('================================');
+        
+        // Script de redirecionamento após 3 segundos
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('⏱️ Timer de redirecionamento iniciado (3 segundos)');
+            
+            setTimeout(async function() {
+                // Captura todos os parâmetros da URL atual
+                const currentParams = window.location.search;
+                
+                // Tentar carregar URL de upsell do JSON
+                let upsellUrl = '/up/index.html'; // Fallback padrão
+                
+                try {
+                    const response = await fetch('./checkout-config.json');
+                    if (response.ok) {
+                        const config = await response.json();
+                        if (config.upsell_url && config.upsell_url.trim() !== '') {
+                            upsellUrl = config.upsell_url;
+                            console.log('✅ URL de upsell carregada do JSON:', upsellUrl);
+                        } else {
+                            console.log('ℹ️ Usando URL de upsell padrão:', upsellUrl);
+                        }
+                    }
+                } catch (error) {
+                    console.log('⚠️ Erro ao carregar config, usando URL padrão:', error);
+                }
+                
+                // Monta a URL de destino preservando os parâmetros
+                const redirectUrl = upsellUrl + currentParams;
+                
+                console.log('🔄 Redirecionando para:', redirectUrl);
+                window.location.href = redirectUrl;
+            }, 3000);
+        });
+        
+        // === CÓDIGO ORIGINAL ABAIXO (MANTIDO PARA REFERÊNCIA) ===
+        // Função para carregar dados do pedido
+        function loadOrderData_BACKUP() {
+            // Carrega dados do localStorage
+            const orderData = localStorage.getItem('orderData');
+            const pixData = localStorage.getItem('pixData');
+            const addressData = localStorage.getItem('userAddress');
+            const cpfData = localStorage.getItem('userCPF');
+            
+            // PRIORIDADE: Dados consolidados do checkout (checkout_form_data)
+            const checkoutFormData = JSON.parse(localStorage.getItem('checkout_form_data') || '{}');
+            const customerName = checkoutFormData.name || '';
+            const customerEmail = checkoutFormData.email || '';
+            const customerCPF = checkoutFormData.cpf || '';
+            const customerPhone = checkoutFormData.phone || '';
+            const checkoutTotalStr = localStorage.getItem('checkout_total') || '0';
+            const checkoutTotal = parseFloat(checkoutTotalStr) || 0;
+            const productTitle = localStorage.getItem('checkout_product_title') || 'Produto';
+            const checkoutItems = JSON.parse(localStorage.getItem('tikshop_cart') || '[]');
+            
+            console.log('🛒 Dados do checkout carregados:', {
+                nome: customerName,
+                email: customerEmail,
+                cpf: customerCPF,
+                telefone: customerPhone,
+                total: checkoutTotal,
+                produto: productTitle,
+                items: checkoutItems
+            });
+            
+            // Dados adicionais do checkout (shipping)
+            const shippingName = localStorage.getItem('checkout_shipping_name');
+            const shippingValue = localStorage.getItem('checkout_shipping_value');
+            
+            console.log('📦 Carregando dados do pedido:', {
+                orderData: orderData ? JSON.parse(orderData) : null,
+                pixData: pixData ? JSON.parse(pixData) : null,
+                addressData: addressData ? JSON.parse(addressData) : null,
+                cpfData: cpfData
+            });
+            
+            // Define data atual
+            const now = new Date();
+            const dateOptions = {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            
+            // Variáveis para armazenar os dados
+            let orderNumber = '';
+            
+            // PRIORIDADE: Usa dados consolidados do checkout
+            let productName = productTitle || 'Produto';
+            let quantity = 1;
+            let totalValue = checkoutTotal || 0; // USA O TOTAL DO CHECKOUT
+            let customerNameVar = customerName || '';
+            let customerEmailVar = customerEmail || '';
+            let customerPhoneVar = customerPhone || '';
+            let customerCPFVar = customerCPF || '';
+            let customerAddress = '';
+            
+            // Monta endereço - PRIORIDADE: usa checkoutFormData
+            if (checkoutFormData.street) {
+                customerAddress = `${checkoutFormData.street}, ${checkoutFormData.number || 'S/N'}`;
+                if (checkoutFormData.complement) customerAddress += `, ${checkoutFormData.complement}`;
+                customerAddress += ` - ${checkoutFormData.neighborhood || ''}, ${checkoutFormData.city || ''}/${checkoutFormData.state || ''}`;
+                if (checkoutFormData.cep) customerAddress += ` - CEP: ${checkoutFormData.cep}`;
+            } else if (addressData) {
+                // Fallback para dados legados
+                try {
+                    const address = JSON.parse(addressData);
+                    if (address.street) {
+                        customerAddress = `${address.street}, ${address.number || 'S/N'}`;
+                        if (address.complement) customerAddress += `, ${address.complement}`;
+                        customerAddress += ` - ${address.neighborhood || ''}, ${address.city || ''}/${address.state || ''}`;
+                        if (address.cep) customerAddress += ` - CEP: ${address.cep}`;
+                    }
+                } catch (e) {
+                    console.error('Erro ao processar endereço:', e);
+                }
+            }
+            
+            let unitPrice = 0;
+            let warrantyPrice = 0;
+            let shippingPrice = parseFloat(shippingValue) || 0;
+            let shippingMethod = shippingName || 'Frete';
+            
+            // Busca dados dos produtos do carrinho
+            if (checkoutItems && checkoutItems.length > 0) {
+                quantity = checkoutItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+                productName = checkoutItems.map(item => item.product?.name || 'Produto').join(', ');
+                console.log('📦 Produtos do carrinho:', productName, '- Qtd:', quantity);
+            }
+            
+            console.log('🎁 Dados do checkout carregados:');
+            console.log('  - Produto:', productName);
+            console.log('  - Frete:', shippingMethod, '- R$', shippingPrice.toFixed(2));
+            console.log('  - Cliente:', customerNameVar);
+            console.log('  - E-mail:', customerEmailVar);
+            console.log('  - Telefone:', customerPhoneVar);
+            console.log('  - CPF:', customerCPFVar);
+            
+            // Tenta pegar itens do carrinho
+            let cartItems = [];
+            const cartData = localStorage.getItem('cart_items');
+            if (cartData) {
+                try {
+                    cartItems = JSON.parse(cartData);
+                } catch {}
+            }
+            
+            // Se não tiver dados do novo checkout, busca do cart_shipping antigo
+            if (!shippingValue) {
+                const shippingData = localStorage.getItem('cart_shipping');
+                if (shippingData) {
+                    try {
+                        const shipping = JSON.parse(shippingData);
+                        shippingPrice = (shipping.price || 0) / 100; // Converte centavos para reais
+                        shippingMethod = shipping.name || 'Frete';
+                        console.log('📦 Frete carregado do cart_shipping:', shippingMethod, '-', shippingPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+                    } catch (e) {
+                        console.error('Erro ao carregar frete:', e);
+                    }
+                }
+            }
+            
+            // Se já existe orderData, usar ele (mas checkout consolidado tem prioridade)
+            if (orderData) {
+                const order = JSON.parse(orderData);
+                orderNumber = order.orderNumber || generateOrderNumber();
+                
+                // Só usa orderData se não tiver dados consolidados do checkout
+                if (!customerName && order.customerName) customerNameVar = order.customerName;
+                if (!customerEmail && order.email) customerEmailVar = order.email;
+                if (!customerPhone && order.phone) customerPhoneVar = order.phone;
+                if (!customerCPF && order.cpf) customerCPFVar = order.cpf;
+                if (!productName || productName === 'Produto') productName = order.productName || productName;
+                if (quantity === 1 && order.quantity) quantity = order.quantity;
+                
+                unitPrice = order.unitPrice || unitPrice;
+                warrantyPrice = order.warrantyPrice || 0;
+                
+                // Recalcula o total se estiver zerado ou se houver frete no localStorage
+                if (!order.totalValue || order.totalValue === 0 || shippingPrice > 0) {
+                    // Calcula subtotal dos produtos
+                    let subtotal = 0;
+                    if (cartItems.length > 0) {
+                        subtotal = cartItems.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0) / 100;
+                    } else {
+                        subtotal = unitPrice * quantity;
+                    }
+                    
+                    // Total = subtotal + frete
+                    totalValue = subtotal + shippingPrice + warrantyPrice;
+                    
+                    console.log('🔄 Recalculando total:');
+                    console.log('  - Subtotal:', subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+                    console.log('  - Frete:', shippingPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+                    console.log('  - Garantia:', warrantyPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+                    console.log('  - TOTAL:', totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+                    
+                    // Atualiza o orderData com o novo total
+                    order.totalValue = totalValue;
+                    order.shippingPrice = shippingPrice;
+                    localStorage.setItem('orderData', JSON.stringify(order));
+                    console.log('💾 OrderData atualizado com novo total');
+                } else {
+                    totalValue = order.totalValue;
+                    shippingPrice = order.shippingPrice || shippingPrice;
+                }
+                
+                console.log('✅ Dados carregados do orderData existente');
+            } else {
+                // Criar novo orderData
+                orderNumber = generateOrderNumber();
+                
+                // Calcula subtotal dos produtos
+                let subtotal = 0;
+                if (cartItems.length > 0) {
+                    quantity = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+                    subtotal = cartItems.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0) / 100;
+                    productName = cartItems.map(item => item.name).join(", ");
+                } else {
+                    quantity = parseInt(localStorage.getItem('cartQuantity')) || 1;
+                    subtotal = unitPrice * quantity;
+                }
+                
+                // Calcula total = subtotal + frete
+                totalValue = subtotal + shippingPrice;
+                
+                console.log('💰 Cálculo do total:');
+                console.log('  - Subtotal produtos:', subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+                console.log('  - Frete:', shippingPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+                console.log('  - TOTAL:', totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+                
+                // Pegar dados do endereço
+                if (addressData) {
+                    const address = JSON.parse(addressData);
+                    customerName = address.nome;
+                    customerEmail = address.email;
+                    customerPhone = address.telefone;
+                }
+                // Pegar CPF
+                if (cpfData) {
+                    customerCPF = cpfData;
+                }
+                // Se houver valor do PIX, usa ele como total (sobrescreve o cálculo)
+                if (pixData) {
+                    const pix = JSON.parse(pixData);
+                    if (pix.valor) {
+                        totalValue = pix.valor / 100;
+                        console.log('💳 Valor do PIX encontrado (sobrescrevendo total):', totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+                    }
+                }
+                // Salvar orderData completo
+                const newOrderData = {
+                    orderNumber: orderNumber,
+                    date: now.toISOString(),
+                    productName: productName,
+                    productId: 'aiwa-boombox-plus',
+                    quantity: quantity,
+                    unitPrice: unitPrice,
+                    warrantyPrice: warrantyPrice,
+                    shippingPrice: shippingPrice,
+                    totalValue: totalValue,
+                    customerName: customerName,
+                    email: customerEmail,
+                    phone: customerPhone,
+                    cpf: customerCPF
+                };
+                if (addressData) {
+                    const address = JSON.parse(addressData);
+                    newOrderData.address = {
+                        street: address.endereco,
+                        number: address.numero,
+                        complement: address.complemento || '',
+                        neighborhood: address.bairro,
+                        city: address.cidade,
+                        state: address.estado,
+                        zipCode: address.cep
+                    };
+                }
+                localStorage.setItem('orderData', JSON.stringify(newOrderData));
+                console.log('✅ Novo orderData criado e salvo:', newOrderData);
+            }
+            
+            // Atualizar número do pedido
+            document.getElementById('order-number').textContent = orderNumber;
+            
+            // Criar detalhes do pedido dinamicamente
+            const detailsContainer = document.getElementById('order-details-container');
+            let detailsHTML = '<h3 class="info-card-title">Detalhes do Pedido</h3>';
+            
+            if (customerNameVar) {
+                detailsHTML += `
+                <div class="info-row">
+                    <span class="info-label">Cliente:</span>
+                    <span class="info-value">${customerNameVar}</span>
+                </div>`;
+            }
+            
+            if (customerEmailVar) {
+                detailsHTML += `
+                <div class="info-row">
+                    <span class="info-label">E-mail:</span>
+                    <span class="info-value">${customerEmailVar}</span>
+                </div>`;
+            }
+            
+            if (customerPhoneVar) {
+                detailsHTML += `
+                <div class="info-row">
+                    <span class="info-label">Telefone:</span>
+                    <span class="info-value">${customerPhoneVar}</span>
+                </div>`;
+            }
+            
+            if (customerCPFVar) {
+                detailsHTML += `
+                <div class="info-row">
+                    <span class="info-label">CPF:</span>
+                    <span class="info-value">${customerCPFVar}</span>
+                </div>`;
+            }
+            
+            if (customerAddress) {
+                detailsHTML += `
+                <div class="info-row">
+                    <span class="info-label">Endereço:</span>
+                    <span class="info-value">${customerAddress}</span>
+                </div>`;
+            }
+            
+            // Exibe todos os produtos do carrinho, se houver
+            if (cartItems.length > 0) {
+                cartItems.forEach(function(item, idx) {
+                    detailsHTML += `
+                        <div class="info-row">
+                            <span class="info-label">Produto:</span>
+                            <span class="info-value">${item.name || 'Produto'}${item.variant ? ' - ' + item.variant : ''}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Quantidade:</span>
+                            <span class="info-value">${item.quantity || 1}x</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Valor Unitário:</span>
+                            <span class="info-value">${((item.price || 0) / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                        </div>`;
+                });
+            } else {
+                detailsHTML += `
+                    <div class="info-row">
+                        <span class="info-label">Produto:</span>
+                        <span class="info-value">${productName}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Quantidade:</span>
+                        <span class="info-value">${quantity}x</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Valor Unitário:</span>
+                        <span class="info-value">${unitPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                    </div>`;
+            }
+            
+            if (warrantyPrice > 0) {
+                detailsHTML += `
+                <div class="info-row">
+                    <span class="info-label">Garantia Estendida:</span>
+                    <span class="info-value">${warrantyPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                </div>`;
+            }
+            
+            if (shippingPrice > 0) {
+                detailsHTML += `
+                <div class="info-row">
+                    <span class="info-label">${shippingMethod}:</span>
+                    <span class="info-value">${shippingPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                </div>`;
+            }
+            
+            detailsHTML += `
+                <div class="info-row">
+                    <span class="info-label">Data do Pedido:</span>
+                    <span class="info-value">${now.toLocaleDateString('pt-BR', dateOptions)}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Método de Pagamento:</span>
+                    <span class="info-value">PIX</span>
+                </div>
+                <div class="info-row total">
+                    <span class="info-label">Total Pago:</span>
+                    <span class="info-value">${totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                </div>
+            `;
+            
+            detailsContainer.innerHTML = detailsHTML;
+            
+            // Atualiza informações de entrega se houver endereço
+            if (addressData) {
+                const address = JSON.parse(addressData);
+                const deliveryText = document.querySelector('.delivery-text');
+                
+                if (deliveryText && address.nome) {
+                    deliveryText.innerHTML = `
+                        <strong>Entregar para:</strong> ${address.nome}<br>
+                        <strong>Endereço:</strong> ${address.endereco}, ${address.numero}${address.complemento ? ', ' + address.complemento : ''}<br>
+                        ${address.bairro}, ${address.cidade} - ${address.estado}, ${address.cep}<br>
+                        <strong>Telefone:</strong> ${address.telefone}<br>
+                        <br>
+                        Seu pedido será processado e enviado em até 2 dias úteis. Você receberá o código de rastreamento por e-mail assim que o produto for despachado.
+                    `;
+                }
+            }
+        }
+        
+        // Função para gerar número do pedido
+        function generateOrderNumber() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            
+            return `#TK-${year}${month}${day}-${random}`;
+        }
+        
+        // Função para limpar dados após um tempo (opcional)
+        function scheduleDataCleanup() {
+            // Remove dados do localStorage após 24 horas
+            setTimeout(() => {
+                localStorage.removeItem('pixData');
+                // Mantém orderData para histórico
+            }, 24 * 60 * 60 * 1000);
+        }
+        
+        // === CÓDIGO ORIGINAL DESATIVADO ===
+        // Carrega dados quando a página é carregada
+        /*
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOrderData();
+            scheduleDataCleanup();
+            
+            // Adiciona animação de entrada
+            document.querySelector('.container').style.opacity = '0';
+            document.querySelector('.container').style.transform = 'translateY(30px)';
+            
+            setTimeout(() => {
+                document.querySelector('.container').style.transition = 'all 0.6s ease';
+                document.querySelector('.container').style.opacity = '1';
+                document.querySelector('.container').style.transform = 'translateY(0)';
+            }, 100);
+        });
+        */
+        
+        // Previne voltar para a página anterior
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.go(1);
+        };
+    </script>
+</body>
+</html>

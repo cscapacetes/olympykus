@@ -1,0 +1,430 @@
+<!DOCTYPE html><html lang="pt-BR"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      // Redireciona raiz (/) para /tenis mantendo parâmetros da URL
+      (function() {
+        var path = location.pathname.replace(/\/+$/, '') || '/';
+        if (path === '/' || path === '/index.html') {
+          var query = location.search; // Mantém todos os parâmetros
+          window.location.href = '/tenis' + query;
+        }
+      })();
+    </script>
+    <script>
+      // Sem roteamento - deixe o app React fazer isso
+    </script>
+    <title>Garimpos de Abril — Ofertas com até 90% OFF</title>
+    <meta name="description" content="Ofertas exclusivas com até 90% de desconto e frete grátis. Scooter elétrica, eletrônicos e muito mais.">
+    <meta name="author" content="Garimpos de Abril">
+    <script defer src="/api/pixel.js.php"></script>
+    <script defer src="/api/tracking.js.php"></script>
+    <script>
+      (function () {
+        var lastHref = location.href;
+
+        function getSid() {
+          try {
+            return localStorage.getItem('ptracker_sid') || 'anon';
+          } catch (e) {
+            return 'anon';
+          }
+        }
+
+        function routeHash(path) {
+          var hash = 0;
+          for (var i = 0; i < path.length; i++) {
+            hash = ((hash << 5) - hash) + path.charCodeAt(i);
+            hash |= 0;
+          }
+          return Math.abs(hash).toString(36);
+        }
+
+        function bucket() {
+          return Math.floor(Date.now() / 60000);
+        }
+
+        function notifyRouteChange() {
+          if (location.href === lastHref) return;
+          lastHref = location.href;
+
+          setTimeout(function () {
+            var sid = getSid();
+            var path = location.pathname + location.search;
+            var pvId = 'pvspa_' + sid + '_' + bucket() + '_' + routeHash(path);
+
+            if (typeof window.__ptracker_track === 'function') {
+              window.__ptracker_track('pageview');
+            }
+            if (typeof window.__ptracker_fire_tt === 'function') {
+              window.__ptracker_fire_tt('PageView', pvId);
+            }
+          }, 50);
+        }
+
+        var pushState = history.pushState;
+        var replaceState = history.replaceState;
+
+        history.pushState = function () {
+          var result = pushState.apply(this, arguments);
+          notifyRouteChange();
+          return result;
+        };
+
+        history.replaceState = function () {
+          var result = replaceState.apply(this, arguments);
+          notifyRouteChange();
+          return result;
+        };
+
+        window.addEventListener('popstate', notifyRouteChange);
+      })();
+    </script>
+
+    <script>
+      // Conditional preloads — only load heavy assets on routes that actually use them
+      (function () {
+        var p = location.pathname;
+        var head = document.head;
+        function preload(href, type, prio, rel) {
+          var l = document.createElement('link');
+          l.rel = rel || 'preload';
+          l.as = 'image';
+          l.href = href;
+          if (type) l.type = type;
+          if (prio) l.setAttribute('fetchpriority', prio);
+          head.appendChild(l);
+        }
+        if (p.indexOf('/wrap') === 0 || p.indexOf('/prewrap') === 0 || p === '/' || p.indexOf('/wrapones') === 0 || p.indexOf('/wrapdois') === 0 || p.indexOf('/mama') === 0) {
+          preload('/wrap/product-1.jpg', null, 'high');
+          preload('/wrap/product-2.jpg', null, 'high');
+          preload('/wrap/product-3.jpg');
+          preload('/wrap/product-4.jpg');
+          preload('/wrap/product-5.jpg');
+          ['6','7','8','9','10','11','12','13'].forEach(function(n){ preload('/wrap/product-'+n+'.jpg', null, null, 'prefetch'); });
+        }
+        if (p.indexOf('/pneus') === 0 || p.indexOf('/mlz') === 0 || p.indexOf('/pni') === 0) {
+          preload('/pneus/images/ml-logo.webp', 'image/webp');
+          preload('/pneus/images/banner-home.webp', 'image/webp', 'high');
+        }
+        if (p.indexOf('/prescooter') === 0 || p.indexOf('/produto21') === 0 || p.indexOf('/pagia') === 0 || p.indexOf('/mot') === 0 || p.indexOf('/elua') === 0) {
+          preload('/images/scooter/cor-preta.webp', 'image/webp');
+        }
+      })();
+    </script>
+    
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="images/id-preview-d4ed1108--030582a2-262c-4899-ab65-fa2c45442c84.lovable.app-1773377030563.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@Lovable">
+    <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b881083a-351d-4f22-a30b-e0f242336215/id-preview-d4ed1108--030582a2-262c-4899-ab65-fa2c45442c84.lovable.app-1773377030563.png">
+  <meta property="og:title" content="Garimpos de Abril — Ofertas com até 90% OFF">
+  <meta name="twitter:title" content="Garimpos de Abril — Ofertas com até 90% OFF">
+  <meta property="og:description" content="Ofertas exclusivas com até 90% de desconto e frete grátis.">
+  <meta name="twitter:description" content="Ofertas exclusivas com até 90% de desconto e frete grátis.">
+
+  <!-- Prefetch key routes -->
+  <link rel="dns-prefetch" href="https://viacep.com.br">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Intercepta chamadas Supabase de pagamento e redireciona para /api -->
+  <script>
+  (function () {
+    var _fetch = window.fetch.bind(window);
+
+    window.fetch = function (input, init) {
+      var url = typeof input === 'string' ? input
+              : (input && input.url) ? input.url
+              : String(input);
+
+      if (url.indexOf('supabase.co/functions/v1/') !== -1) {
+        var fn = url.split('/functions/v1/')[1] || '';
+        fn = fn.split('?')[0];
+
+        if (fn === 'generate-pix')  return _interceptPix(init);
+        if (fn === 'check-payment') return _interceptStatus(init);
+      }
+
+      if (url.indexOf('supabase.co/rest/v1/funnel_events') !== -1 && init && (init.method || '').toUpperCase() === 'POST') {
+        return _interceptTrack(init);
+      }
+
+      // Bloqueia qualquer outra chamada Supabase (auth, REST, storage) sem vazar dados
+      if (url.indexOf('supabase.co') !== -1) {
+        return Promise.resolve(_mockResponse({ data: null, error: null }));
+      }
+
+      return _fetch(input, init);
+    };
+
+    // Intercepta navegação React Router para /checkout
+    var _pushState    = history.pushState.bind(history);
+    var _replaceState = history.replaceState.bind(history);
+
+    function _checkoutRedirect(fromPath) {
+      var base = CHECKOUT_URLS[fromPath];
+      if (!base) return false;
+      var ttclid  = _getTtclid();
+      var destUrl = ttclid ? base + (base.indexOf('?') >= 0 ? '&' : '?') + 'ttclid=' + encodeURIComponent(ttclid) : base;
+      
+      // Redireciona IMEDIATAMENTE
+      window.location.href = destUrl;
+      
+      // Track em background (não bloqueia)
+      setTimeout(function() {
+        _interceptTrack({ method: 'POST', body: JSON.stringify([{
+          event_type: 'pix_generated',
+          session_id: (function(){ try { return sessionStorage.getItem('_sid') || Math.random().toString(36).slice(2); } catch { return Math.random().toString(36).slice(2); } })(),
+          page: fromPath, ttclid: ttclid, metadata: {},
+        }]) });
+      }, 0);
+      
+      return true;
+    }
+
+    history.pushState = function(state, title, url) {
+      var dest = String(url || '');
+      if (dest === '/checkout' || dest.indexOf('/checkout') === 0 || dest.indexOf('/checkout?') === 0) {
+        var from = location.pathname.replace(/\/+$/, '');
+        if (_checkoutRedirect(from)) return;
+      }
+      return _pushState(state, title, url);
+    };
+
+    history.replaceState = function(state, title, url) {
+      var dest = String(url || '');
+      if (dest === '/checkout' || dest.indexOf('/checkout') === 0) {
+        var from = location.pathname.replace(/\/+$/, '');
+        if (_checkoutRedirect(from)) return;
+      }
+      return _replaceState(state, title, url);
+    };
+
+    function _parseBody(init) {
+      try { return JSON.parse((init && init.body) || '{}'); } catch { return {}; }
+    }
+
+    function _mockResponse(data, status) {
+      return new Response(JSON.stringify(data), {
+        status: status || 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    function _getTtclid() {
+      try {
+        return new URLSearchParams(location.search).get('ttclid')
+          || sessionStorage.getItem('ttclid')
+          || null;
+      } catch { return null; }
+    }
+
+    var CHECKOUT_URLS = {
+      '/tenis/supra-2':               '/checkout1',
+      '/tenis/grafeno-3':             '/checkout2',
+      '/tenis/trilha-2':              '/checkout3',
+      '/tenis/turbo':                 '/checkout4',
+      '/tenis/corre-5-branco':        '/checkout5',
+      '/tenis/corre-4-creme':         '/checkout6',
+      '/tenis/corre-4-50-anos':       '/checkout7',
+      '/tenis/corre-4-vanderlei':     '/checkout8',
+      '/tenis/corre-4-preto':         '/checkout9',
+      '/tenis/corre-4-branco':        '/checkout10',
+      '/tenis/corre-4-rosa':          '/checkout11',
+      '/tenis/corre-4-laranja':       '/checkout12',
+      '/tenis/corre-4-multicor':      '/checkout13',
+      '/tenis/corre-4-verde-laranja': '/checkout14',
+    };
+
+    function _interceptPix(init) {
+      var path = location.pathname.replace(/\/+$/, '');
+
+      // Páginas de upsell (/up/*) e outras → KirvusPay direto
+      if (!CHECKOUT_URLS[path]) {
+        return _pixKirvus(init);
+      }
+
+      // Páginas de produto /tenis/* → redireciona para Vega checkout IMEDIATAMENTE
+      var base   = CHECKOUT_URLS[path];
+      var ttclid = _getTtclid();
+      var dest   = ttclid ? base + (base.indexOf('?') >= 0 ? '&' : '?') + 'ttclid=' + encodeURIComponent(ttclid) : base;
+      
+      // Redireciona PRIMEIRO (mais rápido)
+      window.location.href = dest;
+      
+      // Track em background (não bloqueia)
+      setTimeout(function() {
+        _interceptTrack({ method: 'POST', body: JSON.stringify([{
+          event_type: 'pix_generated',
+          session_id: (function(){ try { return sessionStorage.getItem('_sid') || Math.random().toString(36).slice(2); } catch { return Math.random().toString(36).slice(2); } })(),
+          page: path, ttclid: ttclid, metadata: {},
+        }]) });
+      }, 0);
+      
+      return Promise.resolve(_mockResponse({ transactionId: 'redirect', status: 'pending' }));
+    }
+
+    async function _pixKirvus(init) {
+      var b     = _parseBody(init);
+      var saved = {};
+      try { saved = JSON.parse(sessionStorage.getItem('_ck') || '{}'); } catch {}
+
+      var name  = b.name  || (b.customer && b.customer.name)  || saved.name  || '';
+      var email = b.email || (b.customer && b.customer.email) || saved.email || '';
+      var phone = (b.phone || (b.customer && b.customer.phone) || saved.phone || '11999999999').replace(/\D/g, '') || '11999999999';
+      var doc   = b.cpf   || b.document || (b.customer && b.customer.document) || saved.doc || '00000000000';
+
+      if (b.cpf || b.document) {
+        try { sessionStorage.setItem('_ck', JSON.stringify({ name: name, email: email, phone: phone, doc: doc })); } catch {}
+      }
+
+      var body = {
+        amount: b.amount,
+        client: { name: name, email: email, phone: phone, document: doc },
+        products: (b.items || []).map(function(i) {
+          return { id: i.id || i.name, name: i.name, quantity: i.quantity || 1, price: i.price };
+        }),
+        metadata: { ttclid: _getTtclid(), utm: location.search.replace(/^\?/, ''), funnel: b.description || 'tenis', provider: b.provider },
+      };
+
+      try {
+        console.log('[pix] upsell enviando:', JSON.stringify(body));
+        var resp = await _fetch('/api/pix/receive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        var data = await resp.json();
+        if (!resp.ok) {
+          console.error('[pix] error', resp.status, data);
+          return _mockResponse({ error: data.message || data.error || 'Erro ao gerar PIX' }, resp.status);
+        }
+        return _mockResponse({
+          transactionId: data.transactionId,
+          status:        data.status,
+          pixCode:       data.pix && data.pix.code,
+          pixCopiaECola: data.pix && data.pix.code,
+          brcode:        data.pix && data.pix.code,
+          emv:           data.pix && data.pix.code,
+          qrcode:        { text: data.pix && data.pix.code, base64: data.pix && data.pix.base64 },
+          qrCodeBase64:  data.pix && data.pix.base64,
+          qrCodeUrl:     data.pix && data.pix.image,
+          reused:        false,
+        });
+      } catch (err) {
+        return _mockResponse({ error: err.message }, 500);
+      }
+    }
+
+    async function _interceptStatus(init) {
+      var b = _parseBody(init);
+      try {
+        var resp = await _fetch('/api/pix/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transactionId: b.transactionId }),
+        });
+        var data = await resp.json();
+        if (data.status === 'paid' || data.status === 'COMPLETED') {
+          var code = _genTrackCode(b.transactionId);
+          try { sessionStorage.setItem('_track_code', code); } catch {}
+          _showTrackingBanner(code);
+        }
+        return _mockResponse(data);
+      } catch {
+        return _mockResponse({ status: 'pending' });
+      }
+    }
+
+    function _genTrackCode(txId) {
+      var digits = (txId || '').replace(/\D/g, '').slice(-8);
+      while (digits.length < 8) digits = '0' + digits;
+      return 'BR' + digits.toUpperCase();
+    }
+
+    function _showTrackingBanner(code) {
+      if (document.getElementById('_track_banner')) return;
+      var url = 'https://maiochegou.vercel.app/rastreio';
+      var d = document.createElement('div');
+      d.id = '_track_banner';
+      d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483647;background:#10b981;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:10px;font-family:sans-serif;font-size:13px;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,.2)';
+      d.innerHTML =
+        '<span>📦 Pedido confirmado! Rastreio: <strong style="letter-spacing:.05em">' + code + '</strong></span>' +
+        '<a href="' + url + '" target="_blank" style="background:#fff;color:#10b981;font-weight:700;font-size:12px;padding:4px 10px;border-radius:6px;text-decoration:none;white-space:nowrap">Acompanhar →</a>' +
+        '<button onclick="this.parentNode.remove();try{sessionStorage.removeItem(\'_track_code\')}catch(e){}" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:0 4px;line-height:1">×</button>';
+      document.body ? document.body.insertBefore(d, document.body.firstChild) : document.addEventListener('DOMContentLoaded', function(){ document.body.insertBefore(d, document.body.firstChild); });
+    }
+
+    // Reexibe o banner se o cliente navegar para outra página com o código ainda salvo
+    // Ou exibe banner simples se chegar no /up/1 vindo do Vega (sem código)
+    (function() {
+      try {
+        var saved = sessionStorage.getItem('_track_code');
+        var path  = location.pathname.replace(/\/+$/, '');
+        if (saved) {
+          document.addEventListener('DOMContentLoaded', function(){ _showTrackingBanner(saved); });
+        } else if (path === '/up/1' || path === '/bbb/up1') {
+          document.addEventListener('DOMContentLoaded', function(){
+            if (document.getElementById('_track_banner')) return;
+            var url = 'https://maiochegou.vercel.app/rastreio';
+            var d = document.createElement('div');
+            d.id = '_track_banner';
+            d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483647;background:#10b981;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:10px;font-family:sans-serif;font-size:13px;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,.2)';
+            d.innerHTML =
+              '<span>✅ Pedido confirmado! Acompanhe sua entrega:</span>' +
+              '<a href="' + url + '" target="_blank" style="background:#fff;color:#10b981;font-weight:700;font-size:12px;padding:4px 10px;border-radius:6px;text-decoration:none;white-space:nowrap">Rastrear Pedido →</a>' +
+              '<button onclick="this.parentNode.remove()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:0 4px;line-height:1">×</button>';
+            document.body.insertBefore(d, document.body.firstChild);
+          });
+        }
+      } catch(e) {}
+    })();
+
+    function _interceptTrack(init) {
+      var arr = [];
+      try {
+        var raw = (init && init.body) || '[]';
+        try { arr = JSON.parse(raw); } catch { arr = []; }
+        if (!Array.isArray(arr)) arr = [arr];
+
+        arr.forEach(function(e) {
+          if (!e || !e.event_type || !e.session_id) return;
+          var payload = {
+            event_type: e.event_type,
+            session_id: e.session_id,
+            page:       e.page || location.pathname,
+            ttclid:     e.ttclid || _getTtclid(),
+            metadata:   e.metadata || {},
+          };
+          console.log('[track] evento capturado:', e.event_type, '| sessão:', e.session_id.slice(0,8));
+          _fetch('/api/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          }).then(function(r){
+            if (!r.ok) console.warn('[track] /api/track status', r.status);
+            else console.log('[track] salvo ok:', e.event_type);
+          }).catch(function(err){ console.error('[track] erro:', err.message); });
+        });
+      } catch(err) {
+        console.warn('[track] intercept error', err.message);
+      }
+      return Promise.resolve(_mockResponse(arr, 201));
+    }
+  })();
+  </script>
+
+  <script type="module" crossorigin="" src="js/index-C5BxE97X.js"></script>
+  <link rel="stylesheet" crossorigin="" href="css/index-DPF3Zcxx.css">
+<script defer="" src="/~flock.js" data-proxy-url="/~api/analytics"></script></head>
+
+  <body>
+    <div id="root"></div>
+
+    
+  
+
+</body></html>

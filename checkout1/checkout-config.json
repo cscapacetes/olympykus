@@ -1,0 +1,121 @@
+{
+    "frete": {
+        "opcoes": [
+            {
+                "name": "Frete Grátis",
+                "price": "0,00",
+                "destaque": false,
+                "selected": true,
+                "description": "7 a 10 dias"
+            },
+            {
+                "name": "Frete Full",
+                "price": "25,88",
+                "destaque": false,
+                "selected": false,
+                "description": "Seu pedido chega em até 72 Horas ⚡"
+            },
+            {
+                "name": "Frete Jadlog",
+                "price": "16,72",
+                "destaque": false,
+                "selected": false,
+                "description": "4 a 7 dias"
+            }
+        ],
+        "enabled": true
+    },
+    "colors": {
+        "hover": "#222222",
+        "principal": "#262626",
+        "secundaria": "#393939"
+    },
+    "offers": {
+        "items": [
+            {
+                "image": "https://cloudfox-digital-products.s3.amazonaws.com/uploads/public/products/4yICI003OLpaClOQKMKAdquJHfG7HmyfTVXZTOcH.jpg",
+                "price": "20.76",
+                "title": "WAP Canhão de Espuma SNOW FOAM ENCAIXE LARGO",
+                "old_price": "41.52",
+                "description": "WAP Canhão de Espuma SNOW FOAM ENCAIXE LARGO"
+            },
+            {
+                "image": "https://cloudfox-digital-products.s3.amazonaws.com/uploads/public/products/vK3UHAbUQX19kPFXSQemQNBskIJm1ENoFjEEiuWK.jpg",
+                "price": "18.71",
+                "title": "Garantia 4 anos",
+                "old_price": "37.41",
+                "description": "GARANTIA 4 ANOS"
+            },
+            {
+                "image": "https://cloudfox-digital-products.s3.amazonaws.com/uploads/public/products/ne5FH5O3jvvbscuAWfTHDCAJENun5UNyU2J6hdjW.jpg",
+                "price": "26.61",
+                "title": "Aspirador De Pó Portátil",
+                "old_price": "53.21",
+                "description": "Aspirador De Pó Portátil"
+            }
+        ],
+        "visible": true
+    },
+    "topbar": {
+        "text": "🚨 <strong>ATENÇÃO! ÚLTIMAS UNIDADES EM PROMOÇÃO</strong> 🚨Devido à grande procura, nosso estoque está quase esgotado.",
+        "visible": true,
+        "bg_color": "#000000"
+    },
+    "contador": {
+        "text": "Esta oferta expira em",
+        "enabled": false,
+        "minutes": 10,
+        "bg_color": "#FF1A1A",
+        "text_color": "#000000",
+        "text_expired": "Oferta expirada!"
+    },
+    "show_cnpj": true,
+    "is_digital": false,
+    "show_email": true,
+    "upsell_url": "https://brasilstoreoficial.lovable.app/upsell",
+    "depoimentos": [
+        {
+            "foto": "https://cloudfy-reviews-images.s3.us-east-1.amazonaws.com/1756656283889-1756588828370-photo_2025-08-30_18-12-16.webp",
+            "nome": "Caio",
+            "estrelas": 5,
+            "descricao": "Lancei minha moto e dei um iPhone pra minha Coroa, o Tiktok acertou de mais nesse evento"
+        },
+        {
+            "foto": "https://cloudfy-reviews-images.s3.us-east-1.amazonaws.com/1756656326432-1756588864250-photo_2025-08-30_18-12-28.webp",
+            "nome": "Ana",
+            "estrelas": 5,
+            "descricao": "Genteeee, não acredito que funcionou, caiu 500 no meu pix"
+        },
+        {
+            "foto": "https://cloudfy-reviews-images.s3.us-east-1.amazonaws.com/1756656365145-1756588901009-photo_2025-08-30_18-12-20.webp",
+            "nome": "Larissa",
+            "estrelas": 5,
+            "descricao": "Eu to amandooo, fazendo muito dindin todo dia mdsss kkkk amooooo"
+        },
+        {
+            "foto": "https://cloudfy-reviews-images.s3.us-east-1.amazonaws.com/1756656398008-1756591742828-photo_2025-08-30_18-12-16.webp",
+            "nome": "Lucas",
+            "estrelas": 5,
+            "descricao": "Familia ta funcionando demais pingou na hora o pix"
+        }
+    ],
+    "banner_photo": "",
+    "company_cnpj": "",
+    "company_logo": "https://cloudfox-digital-products.s3.amazonaws.com/uploads/user/zJqoR32dRJGVj5D/public/stores/BNjzgPRx5jZM78R/logo/9W3Xcjz70kHXae2Z4sLyS18RezaGFzj9vy7sCmVe.png",
+    "company_name": "",
+    "last_updated": "2026-05-07 02:44:42",
+    "product_name": "Tênis OLPKS Corre Supra 2 ",
+    "company_email": "",
+    "product_image": "https://cloudfox-digital-products.s3.amazonaws.com/uploads/public/products/vChK7NK1CvaUCLB6maRWP7xuZXDdZysNtBbzIACm.png",
+    "product_price": "121,47",
+    "checkout_model": "vega",
+    "show_cpf_field": true,
+    "show_safe_badge": true,
+    "safe_badge_image": "https://pay.pedidoshops.shop/assets/img/safe-payment.svg?v=1778121879",
+    "show_email_field": true,
+    "show_phone_field": true,
+    "show_banner_photo": true,
+    "show_company_logo": true,
+    "depoimentos_enabled": false,
+    "product_description": "entrega rápida"
+}

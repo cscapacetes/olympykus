@@ -1,0 +1,252 @@
+@font-face {
+    font-family: sirius-font;
+    src: url("../fonts/sirius/sirius-font.eot?v=1");
+    src:
+        url("../fonts/sirius/sirius-font.eot??v=1#iefix") format("embedded-opentype"),
+        url("../fonts/sirius/sirius-font.woff2?v=1") format("woff2"),
+        url("../fonts/sirius/sirius-font.woff?v=1") format("woff"),
+        url("../fonts/sirius/sirius-font.ttf?v=1") format("truetype"),
+        url("../fonts/sirius/sirius-font.svg?v=1#sirius-font") format("svg");
+    font-weight: 400;
+    font-style: normal;
+}
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    @font-face {
+        font-family: sirius-font;
+        src: url("../fonts/sirius/sirius-font.svg#sirius-font") format("svg");
+    }
+}
+[data-icon]::before {
+    content: attr(data-icon);
+}
+.o-add-1::before,
+.o-add-circle-1::before,
+.o-add-user-1::before,
+.o-agenda-1::before,
+.o-angle-down-1::before,
+.o-angle-left-1::before,
+.o-angle-right-1::before,
+.o-angle-up-1::before,
+.o-arrow-right-1::before,
+.o-bank-cards-1::before,
+.o-bin-1::before,
+.o-cash-dispenser-1::before,
+.o-checkbox-confirm-circle-1::before,
+.o-checked-circle-1::before,
+.o-checkmark-1::before,
+.o-checkout-cart-1::before,
+.o-clouds-1::before,
+.o-cloudy-fog-1::before,
+.o-cogwheel-1::before,
+.o-comments-1::before,
+.o-config-1::before,
+.o-copy-1::before,
+.o-credit-card-1::before,
+.o-currency-1::before,
+.o-display-1::before,
+.o-dollar-sign-1::before,
+.o-download-cloud-1::before,
+.o-edit-1::before,
+.o-export-1::before,
+.o-eye-1::before,
+.o-file-explorer-1::before,
+.o-gear-1::before,
+.o-imac-screen-1::before,
+.o-info-1::before,
+.o-info-help-1::before,
+.o-iphone-1::before,
+.o-lock-server-1::before,
+.o-locked-1::before,
+.o-loop-1::before,
+.o-money-1::before,
+.o-money-bag-1::before,
+.o-new-message-1::before,
+.o-paper-1::before,
+.o-portfolio-grid-1::before,
+.o-question-1::before,
+.o-question-help-1::before,
+.o-reload-1::before,
+.o-sales-up-1::before,
+.o-security-shield-1::before,
+.o-shipping-box-1::before,
+.o-social-1::before,
+.o-speed-1::before,
+.o-store-1::before,
+.o-upload-to-cloud-1::before,
+.o-whatsapp-1::before,
+[data-icon]::before {
+    display: inline-block;
+    font-family: sirius-font;
+    font-style: normal;
+    font-weight: 400;
+    font-variant: normal;
+    line-height: 1;
+    text-decoration: inherit;
+    text-rendering: optimizeLegibility;
+    text-transform: none;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    font-smoothing: antialiased;
+}
+.o-add-1::before {
+    content: "\f9f5";
+}
+.o-add-circle-1::before {
+    content: "\f9f6";
+}
+.o-add-user-1::before {
+    content: "\f9dc";
+}
+.o-agenda-1::before {
+    content: "\f9cd";
+}
+.o-angle-down-1::before {
+    content: "\f9fd";
+}
+.o-angle-up-1::before {
+    content: "\f9fe";
+}
+.o-angle-right-1::before {
+    content: "\fa11";
+}
+.o-angle-left-1::before {
+    content: "\fa10";
+}
+.o-bank-cards-1::before {
+    content: "\f9dd";
+}
+.o-bin-1::before {
+    content: "\f9ce";
+}
+.o-cash-dispenser-1::before {
+    content: "\f9de";
+}
+.o-checkbox-confirm-circle-1::before {
+    content: "\f9f7";
+}
+.o-checked-circle-1::before {
+    content: "\f9df";
+}
+.o-checkmark-1::before {
+    content: "\f9f8";
+}
+.o-checkout-cart-1::before {
+    content: "\f9e0";
+}
+.o-clouds-1::before {
+    content: "\f9f9";
+}
+.o-cloudy-fog-1::before {
+    content: "\f9fa";
+}
+.o-cogwheel-1::before {
+    content: "\f9e1";
+}
+.o-comments-1::before {
+    content: "\f9e2";
+}
+.o-config-1::before {
+    content: "\f9e3";
+}
+.o-copy-1::before {
+    content: "\f9cf";
+}
+.o-credit-card-1::before {
+    content: "\f9d0";
+}
+.o-currency-1::before {
+    content: "\f9e4";
+}
+.o-display-1::before {
+    content: "\f9e5";
+}
+.o-dollar-sign-1::before {
+    content: "\f9e6";
+}
+.o-download-cloud-1::before {
+    content: "\f9fb";
+}
+.o-edit-1::before {
+    content: "\f9d1";
+}
+.o-export-1::before {
+    content: "\f9d2";
+}
+.o-eye-1::before {
+    content: "\f9d3";
+}
+.o-file-explorer-1::before {
+    content: "\f9e7";
+}
+.o-gear-1::before {
+    content: "\f9e8";
+}
+.o-imac-screen-1::before {
+    content: "\f9d4";
+}
+.o-info-1::before {
+    content: "\f9e9";
+}
+.o-info-help-1::before {
+    content: "\f9d5";
+}
+.o-iphone-1::before {
+    content: "\f9d6";
+}
+.o-lock-server-1::before {
+    content: "\fa00";
+}
+.o-locked-1::before {
+    content: "\fa01";
+}
+.o-loop-1::before {
+    content: "\f9d7";
+}
+.o-money-1::before {
+    content: "\f9ea";
+}
+.o-money-bag-1::before {
+    content: "\f9eb";
+}
+.o-new-message-1::before {
+    content: "\f9f4";
+}
+.o-paper-1::before {
+    content: "\f9d8";
+}
+.o-portfolio-grid-1::before {
+    content: "\f9ec";
+}
+.o-question-1::before {
+    content: "\f9ed";
+}
+.o-question-help-1::before {
+    content: "\f9d9";
+}
+.o-reload-1::before {
+    content: "\f9ee";
+}
+.o-sales-up-1::before {
+    content: "\f9ef";
+}
+.o-security-shield-1::before {
+    content: "\fa02";
+}
+.o-shipping-box-1::before {
+    content: "\f9f0";
+}
+.o-social-1::before {
+    content: "\f9f1";
+}
+.o-speed-1::before {
+    content: "\f9f2";
+}
+.o-store-1::before {
+    content: "\f9f3";
+}
+.o-upload-to-cloud-1::before {
+    content: "\f9fc";
+}
+.o-whatsapp-1::before {
+    content: "\f9db";
+}

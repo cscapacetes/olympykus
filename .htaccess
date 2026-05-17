@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # Não reescrever se o arquivo ou diretório existir
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  
+  # Reescrever para index.html na pasta correspondente
+  RewriteRule ^(.+)$ index.html [L]
+</IfModule>
